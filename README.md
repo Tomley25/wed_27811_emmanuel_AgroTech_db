@@ -49,11 +49,59 @@ work easier and very organized.
 
 To deploy and test the system, run the following files sequentially in your Oracle environment:
 
-1.  **Schema Setup (DDL):** `database/01_DDL_Schema_Sequences.sql`
-2.  **Data Insertion (DML):** `database/02_DML_Data_Insertion.sql`
-3.  **Logic & Security:** `database/03_PLSQL_Package_Body.sql` and `database/04_Triggers_Security.sql`
+1.  **Schema Setup (DDL):** <a href="database/scripts/table_creation_and_sequence.sql">table_creation_and_sequence.sql</a>
+2.  **Data Insertion (DML):** <a href="database/scripts/data_insertion.sql">data_insertion.sql</a>
+3.  **Logic & Security:** <a href="documentation/design_decisions.md">design_decision.md</a>
+4.  **analytical Reporting:** <a href="Queries/analytics_queries.sql">analytics_queries.sql</a>
+
 
 ## Testing and Proof
 The folder `testing_validation/` contains the necessary scripts and screenshots to prove all security and business rules are correctly implemented.
 
-***
+<a href="Screenshots/test_results">test_results</a>
+
+#### 1. Schedule Adherence Trend (Using COUNT() OVER)
+``` sql
+SELECT
+    DUE_DATE,
+    TASK_TYPE,
+    COMPLETION_DATE,
+    -- Running count of all tasks due up to this date
+    COUNT(*) OVER (ORDER BY DUE_DATE) AS Running_Total_Tasks_Due
+FROM
+    SCHEDULES
+WHERE
+    CROP_ID = 1
+ORDER BY
+    DUE_DATE;
+```
+<img src="Screenshots/test_results/Testing the running total of completed task.png" height=400>
+
+#### 2. Weather Volatility Analysis (Using LAG() OVER)
+``` sql
+SELECT
+    OBSERVATION_DATE,
+    RAINFALL_MM AS Today_Rain,
+    -- LAG: Gets the rainfall value from the preceding row (yesterday)
+    LAG(RAINFALL_MM, 1, 0) OVER (PARTITION BY FARM_ID ORDER BY OBSERVATION_DATE) AS Yesterday_Rain,
+    -- Calculate the day-to-day change
+    (RAINFALL_MM - LAG(RAINFALL_MM, 1, 0) OVER (PARTITION BY FARM_ID ORDER BY OBSERVATION_DATE)) AS Rainfall_Change
+FROM 
+    WEATHER
+WHERE 
+    FARM_ID = 1 AND OBSERVATION_DATE >= DATE '2024-03-01'
+ORDER BY 
+    OBSERVATION_DATE;
+```
+<img src="Screenshots/test_results/Testing the Comparison of rain on different days.png" height=400>
+
+---
+### 5. Final Conclusion and Presentation Link
+
+## 🚀 Conclusion
+
+The AgroTech system successfully delivers a **secure, automated, and data-driven solution** that meets all capstone requirements, demonstrating proficiency in database design, advanced PL/SQL programming, security enforcement, and business intelligence reporting.
+
+### Final Presentation
+<a href="https://docs.google.com/presentation/d/1CVU3NZvMGhwj7gJYn8qWrKmerCjtNIpL/edit?usp=sharing&ouid=116521724856338087289&rtpof=true&sd=true">AgroTech Project Presentation</a>
+
