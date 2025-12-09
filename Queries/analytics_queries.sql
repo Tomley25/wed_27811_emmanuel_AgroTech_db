@@ -1,21 +1,4 @@
--- 1. Resource Efficiency Ranking (Using DENSE_RANK() OVER)
--- Ranks farms by resource usage percentage (lower usage percentage is better/more efficient)
-SELECT 
-    FARM_ID,
-    NAME AS Farm_Name,
-    -- Calculate Usage Percentage (Simulated Consumption / Total Stock)
-    (SUM(s.RESOURCE_QUANTITY_NEEDED) / SUM(i.STOCK_QUANTITY)) * 100 AS Usage_Percentage,
-    -- DENSE_RANK assigns the ranking
-    DENSE_RANK() OVER (ORDER BY (SUM(s.RESOURCE_QUANTITY_NEEDED) / SUM(i.STOCK_QUANTITY)) ASC) AS Efficiency_Rank
-FROM 
-    FARMS f
-JOIN INVENTORY i ON f.FARM_ID = i.FARM_ID
-LEFT JOIN CROPS c ON f.FARM_ID = c.FARM_ID
-LEFT JOIN SCHEDULES s ON c.CROP_ID = s.CROP_ID
-GROUP BY f.FARM_ID, f.NAME
-ORDER BY Efficiency_Rank ASC;
-
--- 2. Weather Volatility Analysis (Using LAG() OVER)
+-- 1. Weather Volatility Analysis (Using LAG() OVER)
 -- Compares today's rainfall to the preceding day's rainfall to track volatility.
 SELECT
     OBSERVATION_DATE,
@@ -31,7 +14,7 @@ WHERE
 ORDER BY 
     OBSERVATION_DATE;
 
--- 3. Schedule Adherence Trend (Using COUNT() OVER)
+-- 2. Schedule Adherence Trend (Using COUNT() OVER)
 -- Shows the running total of completed tasks to identify adherence trends.
 SELECT
     DUE_DATE,
