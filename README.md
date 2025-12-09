@@ -142,7 +142,7 @@ This process elevates inventory tracking from a manual, reactive system to an **
 * **Real-time Data:** The system guarantees inventory deduction (`UPDATE INVENTORY`) is synchronous with task completion (`UPDATE SCHEDULES`), providing real-time data integrity.
 * **Proactive Alerting:** The system uses conditional logic (`FUNC_IS_STOCK_CRITICAL`) to generate low-stock alerts *before* a crisis occurs, preventing costly task delays and crop loss.
 
-<img src="Screenshots/database_objects/BPMN.png">
+<img src="Screenshots/database_objects/BPMN Structure.png">
 
 ---
 
