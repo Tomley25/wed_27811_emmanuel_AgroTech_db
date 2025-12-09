@@ -45,6 +45,27 @@ work easier and very organized.
 
 ---
 
+## Creating a Pluggable Database
+This is the standard way to create a new, empty PDB. The new PDB is copied from the PDB Seed (PDB$SEED), which acts as an Oracle template.
+<img src="Screenshots/database_objects/create pdb.png">
+<img src="Screenshots/database_objects/show pdbs.png">
+---
+## Checking if we are ready to go in the OEM
+<img src="Screenshots/oem_monitoring/Login to Oracle Enterprise Oracle.png">
+
+### What Sequences mean
+A sequence in Oracle SQL is a database object used to automatically generate unique numbers in ascending or descending order. They are primarily used to populate Primary Key (PK) columns, ensuring that every new record gets a unique identifier without manual management or relying on complicated application logic.
+
+Sequences are particularly useful because they:
+
+Guarantee Uniqueness: Each time you call the sequence, it provides the next number in the series, ensuring no two rows receive the same ID.
+
+Are Independent of Transactions: A number consumed from a sequence is gone forever, even if the transaction that requested it is rolled back. This ensures concurrency and high performance, as the database doesn't need to lock tables to determine the next available ID.
+
+Are Simple to Use: You use the pseudocolumns NEXTVAL and CURRVAL to interact with them.
+
+<img src="Screenshots/database_objects/create sequences.png">
+
 ## 🛠️ Setup and Execution Steps
 
 To deploy and test the system, run the following files sequentially in your Oracle environment:
@@ -95,8 +116,73 @@ ORDER BY
 ```
 <img src="Screenshots/test_results/Testing the Comparison of rain on different days.png" height=400>
 
+#  BPMN Process Explanation (Phase II Deliverable)
+
+## Process Name
+Automated Resource Management and Alert Generation
+
+## Process Objective
+To ensure immediate, accurate deduction of inventory following task completion and to proactively alert farm management when stock levels fall to a critical, predefined threshold.
+
 ---
-### 5. Final Conclusion and Presentation Link
+
+## 1. Define Scope
+
+The AgroTech system manages all core operational activities required for crop production within a farm.
+
+### Automated Functions
+* Task scheduling based on crop type and planting date.
+* Real-time inventory deduction upon task completion.
+* Proactive generation of deadline alerts (using **Explicit Cursors**).
+* Conditional stock monitoring and critical low-stock alerting.
+* Data integrity enforcement during sensitive DML transactions.
+
+### MIS Relevance (Management Information System)
+This process elevates inventory tracking from a manual, reactive system to an **automated Management Information System (MIS) function**.
+* **Real-time Data:** The system guarantees inventory deduction (`UPDATE INVENTORY`) is synchronous with task completion (`UPDATE SCHEDULES`), providing real-time data integrity.
+* **Proactive Alerting:** The system uses conditional logic (`FUNC_IS_STOCK_CRITICAL`) to generate low-stock alerts *before* a crisis occurs, preventing costly task delays and crop loss.
+
+<img src="Screenshots/database_objects/BPMN.png">
+
+---
+
+### Critical Security Validation Proofs (Phase VII)
+
+The primary goal of the security implementation was to ensure the DML restriction policy could not be bypassed, while guaranteeing every violation is logged for compliance.
+
+| Proof Component | Description |
+| :--- | :--- |
+| **1. DML Denial (ORA-20001)** | Proof that the **Compound Trigger** successfully intercepted the `UPDATE` attempt on the `INVENTORY` table and blocked it using the custom `ORA-20001` error code. This confirms the policy cannot be bypassed.
+| **2. Audit Log Verification** | Proof that the trigger correctly executed the `INSERT INTO AUDIT_LOG` statement *before* raising the error, recording the transaction with **STATUS='DENIED'** and the reason for the violation. 
+
+<img src="Screenshots/test_results/Compound Trigger (1).png">
+<img src="Screenshots/test_results/Compound Trigger (2).png">
+
+---
+
+## 2. Identify Key Entities & Actors
+
+### 👤 Users / Actors
+* **Farm Managers / Field Supervisors:** Confirm task completion, monitor schedules.
+* **Data Entry Personnel:** Input weather data, initial stock levels.
+* **System Administrator:** Maintain PL/SQL logic, generate complex BI reports.
+* **The Database (PL/SQL Layer):** The central actor, executing all automated logic.
+
+### 🏢 Departments Involved
+* **Field Operations:** Source of task completion data.
+* **Resource Management/Warehouse:** Source of initial stock data, impacted by deductions.
+* **Administration/IT:** Owner of the database and its security policies.
+
+### 💡 Roles & Responsibilities
+
+| Role | Primary Responsibility | Key Database Action |
+| :--- | :--- | :--- |
+| **Farm Manager** | Confirm task completion and resource use. | Inputs data that triggers `PRC_COMPLETE_TASK`. |
+| **PL/SQL Layer** | Execute atomic DML and enforce rules. | Runs `PRC_COMPLETE_TASK`, triggers `TRG_INVENTORY_SECURITY`, and generates `ALERTS`. |
+| **System Admin** | Generate reports and manage users/security. | Runs analytical queries (`DENSE_RANK`, `LAG`), manages `AUDIT_LOG`. |
+
+---
+###  Final Conclusion and Presentation Link
 
 ## 🚀 Conclusion
 
